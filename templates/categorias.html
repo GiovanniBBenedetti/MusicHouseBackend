@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Teste Categorias Produtos</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f9f9f9;
+      color: #333;
+      margin: 40px;
+    }
+    h1 {
+      color: #780000;
+    }
+    section {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+    }
+    input, textarea {
+      padding: 8px;
+      margin: 5px 0;
+      width: 100%;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #780000;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:hover {
+      background-color: #c1121f;
+    }
+    pre {
+      background: #eee;
+      padding: 10px;
+      border-radius: 5px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Teste de Categorias de Produtos</h1>
+
+  <section>
+    <h2>Listar Categorias</h2>
+    <button onclick="listarCategorias()">Listar</button>
+    <pre id="listaCategorias"></pre>
+  </section>
+
+  <section>
+    <h2>Criar Categoria</h2>
+    <form id="formCriarCategoria">
+      <label>Nome:</label>
+      <input type="text" id="nome" required>
+
+      <label>Descrição:</label>
+      <textarea id="descricao" required></textarea>
+
+      <label>Ícone (opcional):</label>
+      <input type="file" id="icone">
+
+      <button type="submit">Criar</button>
+    </form>
+    <pre id="resCriar"></pre>
+  </section>
+
+  <section>
+    <h2>Obter Categoria por ID</h2>
+    <input type="number" id="idBuscar" placeholder="Digite o ID">
+    <button onclick="buscarCategoria()">Buscar</button>
+    <pre id="resBuscar"></pre>
+  </section>
+
+  <section>
+    <h2>Excluir Categoria</h2>
+    <input type="number" id="idExcluir" placeholder="Digite o ID">
+    <button onclick="excluirCategoria()">Excluir</button>
+    <pre id="resExcluir"></pre>
+  </section>
+
+  <script>
+    const baseURL = "http://localhost:8080/categorias"; 
+
+    
+    async function listarCategorias() {
+      try {
+        const res = await fetch(baseURL);
+        const data = await res.json();
+        document.getElementById('listaCategorias').textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        document.getElementById('listaCategorias').textContent = "Erro: " + err;
+      }
+    }
+
+    document.getElementById('formCriarCategoria').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData();
+      formData.append('nome', document.getElementById('nome').value);
+      formData.append('descricao', document.getElementById('descricao').value);
+      const icone = document.getElementById('icone').files[0];
+      if (icone) formData.append('icone', icone);
+
+
+      try {
+        const res = await fetch(baseURL, {
+          method: "POST",
+          body: formData
+        });
+        const data = await res.json();
+        document.getElementById('resCriar').textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        document.getElementById('resCriar').textContent = "Erro: " + err;
+      }
+    });
+
+    // Buscar por ID
+    async function buscarCategoria() {
+      const id = document.getElementById('idBuscar').value;
+      if (!id) return alert("Informe um ID");
+      try {
+        const res = await fetch(`${baseURL}/${id}`);
+        const data = await res.json();
+        document.getElementById('resBuscar').textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        document.getElementById('resBuscar').textContent = "Erro: " + err;
+      }
+    }
+
+    async function excluirCategoria() {
+      const id = document.getElementById('idExcluir').value;
+      if (!id) return alert("Informe um ID");
+      try {
+        const res = await fetch(`${baseURL}/${id}`, { method: "DELETE" });
+        const data = await res.json();
+        document.getElementById('resExcluir').textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        document.getElementById('resExcluir').textContent = "Erro: " + err;
+      }
+    }
+  </script>
+</body>
+</html>

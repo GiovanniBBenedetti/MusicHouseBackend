@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Teste Produtos - Music House</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #fdf0d5;
+      color: #131312;
+      margin: 40px;
+    }
+    h1 { color: #780000; }
+    section {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    input, textarea, select {
+      width: 100%;
+      padding: 8px;
+      margin: 6px 0;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background: #780000;
+      color: white;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:hover { background: #c1121f; }
+    pre {
+      background: #f8f8f8;
+      padding: 10px;
+      border-radius: 6px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🧪 Teste de Produtos (Music House)</h1>
+
+  <section>
+    <h2>1️⃣ Listar Produtos</h2>
+    <button onclick="listarProdutos()">Listar</button>
+    <pre id="listaProdutos"></pre>
+  </section>
+
+  <section>
+    <h2>2️⃣ Criar Produto</h2>
+    <form id="formCriarProduto">
+      <label>Nome:</label>
+      <input type="text" id="nome" required>
+
+      <label>Descrição:</label>
+      <textarea id="descricao" required></textarea>
+
+      <label>Matérias:</label>
+      <input type="text" id="materias" placeholder="Ex: madeira, nylon">
+
+      <label>Detalhes:</label>
+      <textarea id="detalhes" placeholder="Informações adicionais..."></textarea>
+
+      <label>Cor:</label>
+      <input type="text" id="cor" required>
+
+      <label>Categoria:</label>
+      <select id="id_categoria" required>
+        <option value="">Carregando categorias...</option>
+      </select>
+
+      <label>Valor:</label>
+      <input type="number" step="0.01" id="valor" required>
+
+      <label>Desconto (%):</label>
+      <input type="number" step="0.01" id="desconto" placeholder="Ex: 10">
+
+      <label>Custo de Produção:</label>
+      <input type="number" step="0.01" id="custo_producao" required>
+
+      <label>Imagem do Produto:</label>
+      <input type="file" id="imagem">
+
+      <button type="submit">Criar Produto</button>
+    </form>
+    <pre id="resCriar"></pre>
+  </section>
+
+  <section>
+    <h2>3️⃣ Obter Produto por ID</h2>
+    <input type="number" id="idBuscar" placeholder="Digite o ID do produto">
+    <button onclick="buscarProduto()">Buscar</button>
+    <pre id="resBuscar"></pre>
+  </section>
+
+  <section>
+    <h2>4️⃣ Atualizar Produto</h2>
+    <form id="formAtualizarProduto">
+      <input type="number" id="idAtualizar" placeholder="ID do produto" required>
+      <input type="text" id="nomeUp" placeholder="Novo nome">
+      <textarea id="descricaoUp" placeholder="Nova descrição"></textarea>
+      <input type="text" id="materiasUp" placeholder="Novas matérias">
+      <textarea id="detalhesUp" placeholder="Novos detalhes"></textarea>
+      <input type="text" id="corUp" placeholder="Nova cor">
+      
+      <label>Categoria:</label>
+      <select id="id_categoriaUp">
+        <option value="">Carregando categorias...</option>
+      </select>
+
+      <input type="number" step="0.01" id="valorUp" placeholder="Novo valor">
+      <input type="number" step="0.01" id="descontoUp" placeholder="Novo desconto">
+      <input type="number" step="0.01" id="custoUp" placeholder="Novo custo produção">
+
+      <label>Nova imagem (opcional):</label>
+      <input type="file" id="imagemUp">
+
+      <button type="submit">Atualizar</button>
+    </form>
+    <pre id="resAtualizar"></pre>
+  </section>
+
+  <section>
+    <h2>5️⃣ Excluir Produto</h2>
+    <input type="number" id="idExcluir" placeholder="Digite o ID do produto">
+    <button onclick="excluirProduto()">Excluir</button>
+    <pre id="resExcluir"></pre>
+  </section>
+
+  <script>
+    const baseURL = "http://localhost:8080/produtos";
+    const categoriasURL = "http://localhost:8080/categorias";
+
+    // LISTAR
+    async function listarProdutos() {
+      try {
+        const res = await fetch(baseURL);
+        const data = await res.json();
+        document.getElementById("listaProdutos").textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        document.getElementById("listaProdutos").textContent = "Erro: " + err;
+      }
+    }
+
+    // CRIAR
+    document.getElementById("formCriarProduto").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const formData = new FormData();
+      formData.append("nome", document.getElementById("nome").value);
+      formData.append("descricao", document.getElementById("descricao").value);
+      formData.append("materias", document.getElementById("materias").value);
+      formData.append("detalhes", document.getElementById("detalhes").value);
+      formData.append("cor", document.getElementById("cor").value);
+      formData.append("id_categoria", document.getElementById("id_categoria").value);
+      formData.append("valor", document.getElementById("valor").value);
+      formData.append("desconto", document.getElementById("desconto").value);
+      formData.append("custo_producao", document.getElementById("custo_producao").value);
+      const imagem = document.getElementById("imagem").files[0];
+      if (imagem) formData.append("imagem", imagem); // 👈 nome igual ao backend
+
+      try {
+        const res = await fetch(baseURL, { method: "POST", body: formData });
+        const data = await res.json();
+        document.getElementById("resCriar").textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        document.getElementById("resCriar").textContent = "Erro: " + err;
+      }
+    });
+
+    // BUSCAR
+    async function buscarProduto() {
+      const id = document.getElementById("idBuscar").value;
+      if (!id) return alert("Informe o ID!");
+      try {
+        const res = await fetch(`${baseURL}/${id}`);
+        const data = await res.json();
+        document.getElementById("resBuscar").textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        document.getElementById("resBuscar").textContent = "Erro: " + err;
+      }
+    }
+
+    // ATUALIZAR
+    document.getElementById("formAtualizarProduto").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const id = document.getElementById("idAtualizar").value;
+      const formData = new FormData();
+      formData.append("nome", document.getElementById("nomeUp").value);
+      formData.append("descricao", document.getElementById("descricaoUp").value);
+      formData.append("materias", document.getElementById("materiasUp").value);
+      formData.append("detalhes", document.getElementById("detalhesUp").value);
+      formData.append("cor", document.getElementById("corUp").value);
+      formData.append("id_categoria", document.getElementById("id_categoriaUp").value);
+      formData.append("valor", document.getElementById("valorUp").value);
+      formData.append("desconto", document.getElementById("descontoUp").value);
+      formData.append("custo_producao", document.getElementById("custoUp").value);
+      const imagemUp = document.getElementById("imagemUp").files[0];
+      if (imagemUp) formData.append("imagem", imagemUp);
+
+      try {
+        const res = await fetch(`${baseURL}/${id}`, { method: "PUT", body: formData });
+        const data = await res.json();
+        document.getElementById("resAtualizar").textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        document.getElementById("resAtualizar").textContent = "Erro: " + err;
+      }
+    });
+
+    // EXCLUIR
+    async function excluirProduto() {
+      const id = document.getElementById("idExcluir").value;
+      if (!id) return alert("Informe o ID!");
+      try {
+        const res = await fetch(`${baseURL}/${id}`, { method: "DELETE" });
+        const data = await res.json();
+        document.getElementById("resExcluir").textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        document.getElementById("resExcluir").textContent = "Erro: " + err;
+      }
+    }
+
+    // 🔽 Buscar categorias e preencher selects
+    async function carregarCategorias() {
+      try {
+        const res = await fetch(categoriasURL);
+        const categorias = await res.json();
+
+        const selects = [document.getElementById("id_categoria"), document.getElementById("id_categoriaUp")];
+        selects.forEach(select => {
+          select.innerHTML = '<option value="">Selecione uma categoria</option>';
+          categorias.forEach(cat => {
+            const opt = document.createElement("option");
+            opt.value = cat.id || cat.id_categoria || cat.idCategoria;
+            opt.textContent = `${cat.nome} (${opt.value})`;
+            select.appendChild(opt);
+          });
+        });
+      } catch (err) {
+        console.error("Erro ao carregar categorias:", err);
+        document.getElementById("id_categoria").innerHTML = "<option value=''>Erro ao carregar categorias</option>";
+      }
+    }
+
+    window.addEventListener("DOMContentLoaded", carregarCategorias);
+  </script>
+</body>
+</html>

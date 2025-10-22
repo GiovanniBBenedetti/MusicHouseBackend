@@ -81,7 +81,7 @@ const criarFuncionarioController = async (req, res) => {
       id_credencial,
       fotoPerfil
     };
-  
+
     const funcionarioId = await criarFuncionario(funcionarioData);
     res.status(201).json({
       mensagem: 'Funcionario Criado com sucesso !!!',
@@ -93,14 +93,6 @@ const criarFuncionarioController = async (req, res) => {
   }
 };
 
-
-const atualizarFuncionario = async (req,res) =>{
-  try{
-
-  }catch(error){
-    
-  }
-}
 
 export {
   listarFuncionariosController,
