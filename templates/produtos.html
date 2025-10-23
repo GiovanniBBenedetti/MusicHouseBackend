@@ -63,8 +63,8 @@
       <label>Descrição:</label>
       <textarea id="descricao" required></textarea>
 
-      <label>Matérias:</label>
-      <input type="text" id="materias" placeholder="Ex: madeira, nylon">
+      <label>Materiais:</label>
+      <input type="text" id="materiais" placeholder="Ex: madeira, nylon">
 
       <label>Detalhes:</label>
       <textarea id="detalhes" placeholder="Informações adicionais..."></textarea>
@@ -107,7 +107,7 @@
       <input type="number" id="idAtualizar" placeholder="ID do produto" required>
       <input type="text" id="nomeUp" placeholder="Novo nome">
       <textarea id="descricaoUp" placeholder="Nova descrição"></textarea>
-      <input type="text" id="materiasUp" placeholder="Novas matérias">
+      <input type="text" id="materiaisUp" placeholder="Novas matérias">
       <textarea id="detalhesUp" placeholder="Novos detalhes"></textarea>
       <input type="text" id="corUp" placeholder="Nova cor">
       
@@ -130,7 +130,7 @@
 
   <section>
     <h2>5️⃣ Excluir Produto</h2>
-    <input type="number" id="idExcluir" placeholder="Digite o ID do produto">
+    <input type="number" id="id_produto" placeholder="Digite o ID do produto">
     <button onclick="excluirProduto()">Excluir</button>
     <pre id="resExcluir"></pre>
   </section>
@@ -156,7 +156,7 @@
       const formData = new FormData();
       formData.append("nome", document.getElementById("nome").value);
       formData.append("descricao", document.getElementById("descricao").value);
-      formData.append("materias", document.getElementById("materias").value);
+      formData.append("materiais", document.getElementById("materiais").value);
       formData.append("detalhes", document.getElementById("detalhes").value);
       formData.append("cor", document.getElementById("cor").value);
       formData.append("id_categoria", document.getElementById("id_categoria").value);
@@ -195,7 +195,7 @@
       const formData = new FormData();
       formData.append("nome", document.getElementById("nomeUp").value);
       formData.append("descricao", document.getElementById("descricaoUp").value);
-      formData.append("materias", document.getElementById("materiasUp").value);
+      formData.append("materiais", document.getElementById("materiaisUp").value);
       formData.append("detalhes", document.getElementById("detalhesUp").value);
       formData.append("cor", document.getElementById("corUp").value);
       formData.append("id_categoria", document.getElementById("id_categoriaUp").value);
@@ -216,7 +216,7 @@
 
     // EXCLUIR
     async function excluirProduto() {
-      const id = document.getElementById("idExcluir").value;
+      const id = document.getElementById("id_produto").value;
       if (!id) return alert("Informe o ID!");
       try {
         const res = await fetch(`${baseURL}/${id}`, { method: "DELETE" });

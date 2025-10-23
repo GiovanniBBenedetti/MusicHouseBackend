@@ -34,23 +34,23 @@ const obterProdutoPorIdController = async (req, res) => {
 
 const criarProdutoController = async (req, res) => {
     try {
-        const { nome, descricao, materias, detalhes, cor, desconto, id_categoria, valor, custo_producao } = req.body;
+        const { nome, descricao, materiais, detalhes, cor, desconto, id_categoria, valor, custo_producao } = req.body;
         let imagemProduto = null;
         if (req.file) {
             imagemProduto = req.file.path.replace(__dirname.replace('\\controllers', ''), '');
         }
-        const produtoData = {
-            nome: nome,
-            descricao: descricao,
-            materias:materias,
-            detalhes:detalhes,  
-            cor: cor,
-            id_categoria: id_categoria,
-            valor: valor,
-            desconto: desconto,
-            custo_producao: custo_producao,
-            imagem: imagemProduto
-        };
+    const produtoData = {
+  nome: nome || null,
+  descricao: descricao || null,
+  materiais: materiais || null,
+  detalhes: detalhes || null,
+  cor: cor || null,
+  id_categoria: id_categoria || null,
+  valor: valor || null,
+  desconto: desconto || null,
+  custo_producao: custo_producao || null,
+  imagem: imagemProduto || null
+};
         const produtoId = await criarProduto(produtoData);
         res.status(201).json({ menssagem: 'Produto criado com sucesso', produtoId });
     } catch (error) {
@@ -62,23 +62,24 @@ const criarProdutoController = async (req, res) => {
 const atualizarProdutoController = async (req, res) => {
     try {
         const produtoId = req.params.id;
-        const { nome, descricao, materias, detalhes, cor, desconto, id_categoria, valor, custo_producao } = req.body;
+        const { nome, descricao, materiais, detalhes, cor, desconto, id_categoria, valor, custo_producao } = req.body;
         let imagemProduto = null;
         if (req.file) {
             imagemProduto = req.file.path.replace(__dirname.replace('\\controllers', ''), '');
         }
-        const produtoData = {
-            nome: nome,
-            descricao: descricao,
-            materias:materias,
-            detalhes:detalhes,  
-            cor: cor,
-            id_categoria: id_categoria,
-            valor: valor,
-            desconto: desconto,
-            custo_producao: custo_producao,
-            imagem: imagemProduto
-        };
+ const produtoData = {
+  nome: nome || null,
+  descricao: descricao || null,
+  materiais: materiais || null,
+  detalhes: detalhes || null,
+  cor: cor || null,
+  id_categoria: id_categoria || null,
+  valor: valor || null,
+  desconto: desconto || null,
+  custo_producao: custo_producao || null,
+  imagem: imagemProduto || null
+};
+
         await atualizarProduto(produtoId, produtoData);
         res.status(200).json({ menssagem: 'Produto atualizado com sucesso' });
     } catch (error) {
@@ -88,22 +89,23 @@ const atualizarProdutoController = async (req, res) => {
 };
 
 const excluirProdutoController = async (req, res) => {
-    try {
-        const produtoId = req.params.id;
-        const verificarProdutoId = obterProdutoPorIdController(produtoId)
+  try {
+    const produtoId = req.params.id;
+    const produto = await obterProdutoPorId(produtoId); 
 
-        if(verificarProdutoId){
-            await excluirProduto(produtoId);
-            res.status(200).json({ menssagem: 'Produto excluído com sucesso' });
-        }else{
-            res.status(404).json({menssagem: 'Nenhum produto encontrado com esse id'})
-        }
-      
-    } catch (error) {
-        console.error('Erro ao excluir produto:', error);
-        res.status(500).json({ menssagem: 'Produto excluído com sucesso' });
+    if (!produto) {
+      return res.status(404).json({ mensagem: 'Nenhum produto encontrado com esse id' });
     }
+
+    await excluirProduto(produtoId);
+    res.status(200).json({ mensagem: 'Produto excluído com sucesso' });
+
+  } catch (error) {
+    console.error('Erro ao excluir produto:', error);
+    res.status(500).json({ mensagem: 'Erro ao excluir produto' });
+  }
 };
+
 
 export {
  listarProdutosController, obterProdutoPorIdController, criarProdutoController, atualizarProdutoController, excluirProdutoController
