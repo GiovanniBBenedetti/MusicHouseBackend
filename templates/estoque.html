@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Teste Estoque - Music House</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #fdf0d5;
+      color: #131312;
+      margin: 40px;
+    }
+    h1 { color: #780000; }
+    section {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    input, textarea, select {
+      width: 100%;
+      padding: 8px;
+      margin: 6px 0;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background: #780000;
+      color: white;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:hover { background: #c1121f; }
+    pre {
+      background: #f8f8f8;
+      padding: 10px;
+      border-radius: 6px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Teste de Estoque (Music House)</h1>
+
+  <section>
+    <h2>Listar Estoques</h2>
+    <button onclick="listarEstoques()">Listar</button>
+    <pre id="listaEstoques"></pre>
+  </section>
+
+  <section>
+    <h2>Criar Estoque</h2>
+    <form id="formCriarEstoque">
+      <label>Franquia:</label>
+      <select id="id_franquia" required>
+        <option value="">Carregando franquias...</option>
+      </select>
+
+      <label>Produto:</label>
+      <select id="id_produto" required>
+        <option value="">Carregando produtos...</option>
+      </select>
+
+      <label>Quantidade:</label>
+      <input type="number" id="quantidade" required>
+
+      <label>Quantidade Mínima:</label>
+      <input type="number" id="minimo" required>
+
+      <button type="submit">Criar Estoque</button>
+    </form>
+    <pre id="resCriar"></pre>
+  </section>
+
+  <section>
+    <h2>Obter Estoque por ID</h2>
+    <input type="number" id="idBuscar" placeholder="Digite o ID do estoque">
+    <button onclick="buscarEstoque()">Buscar</button>
+    <pre id="resBuscar"></pre>
+  </section>
+
+  <section>
+    <h2>Atualizar Estoque</h2>
+    <form id="formAtualizarEstoque">
+      <input type="number" id="idAtualizar" placeholder="ID do estoque" required>
+      <input type="number" id="quantidadeUp" placeholder="Nova quantidade">
+      <input type="number" id="minimoUp" placeholder="Novo mínimo">
+
+      <button type="submit">Atualizar Estoque</button>
+    </form>
+    <pre id="resAtualizar"></pre>
+  </section>
+
+  <section>
+    <h2>Excluir Estoque</h2>
+    <input type="number" id="idExcluir" placeholder="Digite o ID do estoque">
+    <button onclick="excluirEstoque()">Excluir</button>
+    <pre id="resExcluir"></pre>
+  </section>
+
+  <script>
+    const baseURL = "http://localhost:8080/estoque";  
+    const franquiasURL = "http://localhost:8080/franquias"; 
+    const produtosURL = "http://localhost:8080/produtos";  
+
+ 
+    async function listarEstoques() {
+      try {
+        const res = await fetch(baseURL);
+        const data = await res.json();
+        document.getElementById("listaEstoques").textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        document.getElementById("listaEstoques").textContent = "Erro: " + err;
+      }
+    }
+
+  
+    async function carregarFranquias() {
+      try {
+        const res = await fetch(franquiasURL);
+        const data = await res.json();
+
+        const franquiaSelect = document.getElementById("id_franquia");
+        franquiaSelect.innerHTML = "<option value=''>Selecione uma franquia</option>";
+        data.forEach(franquia => {
+          const option = document.createElement("option");
+          option.value = franquia.id_franquia;
+          option.textContent = franquia.endereco_completo;
+          franquiaSelect.appendChild(option);
+        });
+      } catch (err) {
+        console.error("Erro ao carregar franquias:", err);
+        document.getElementById("id_franquia").innerHTML = "<option value=''>Erro ao carregar franquias</option>";
+      }
+    }
+
+    // CARREGAR PRODUTOS
+    async function carregarProdutos() {
+      try {
+        const res = await fetch(produtosURL);
+        const data = await res.json();
+
+        const produtoSelect = document.getElementById("id_produto");
+        produtoSelect.innerHTML = "<option value=''>Selecione um produto</option>";
+        data.forEach(produto => {
+          const option = document.createElement("option");
+          option.value = produto.id_produto;
+          option.textContent = produto.nome;
+          produtoSelect.appendChild(option);
+        });
+      } catch (err) {
+        console.error("Erro ao carregar produtos:", err);
+        document.getElementById("id_produto").innerHTML = "<option value=''>Erro ao carregar produtos</option>";
+      }
+    }
+
+    // CRIAR
+    document.getElementById("formCriarEstoque").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const formData = {
+        id_franquia: document.getElementById("id_franquia").value,
+        id_produto: document.getElementById("id_produto").value,
+        quantidade: document.getElementById("quantidade").value,
+        minimo: document.getElementById("minimo").value
+      };
+      try {
+        const res = await fetch(baseURL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(formData)
+        });
+        const data = await res.json();
+        document.getElementById("resCriar").textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        document.getElementById("resCriar").textContent = "Erro: " + err;
+      }
+    });
+
+    // BUSCAR
+    async function buscarEstoque() {
+      const id = document.getElementById("idBuscar").value;
+      if (!id) return alert("Informe o ID!");
+      try {
+        const res = await fetch(`${baseURL}/${id}`);
+        const data = await res.json();
+        document.getElementById("resBuscar").textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        document.getElementById("resBuscar").textContent = "Erro: " + err;
+      }
+    }
+
+    // ATUALIZAR
+    document.getElementById("formAtualizarEstoque").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const id = document.getElementById("idAtualizar").value;
+      const formData = {
+        quantidade: document.getElementById("quantidadeUp").value,
+        minimo: document.getElementById("minimoUp").value
+      };
+      try {
+        const res = await fetch(`${baseURL}/${id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(formData)
+        });
+        const data = await res.json();
+        document.getElementById("resAtualizar").textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        document.getElementById("resAtualizar").textContent = "Erro: " + err;
+      }
+    });
+
+    // EXCLUIR
+    async function excluirEstoque() {
+      const id = document.getElementById("idExcluir").value;
+      if (!id) return alert("Informe o ID!");
+      try {
+        const res = await fetch(`${baseURL}/${id}`, { method: "DELETE" });
+        const data = await res.json();
+        document.getElementById("resExcluir").textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        document.getElementById("resExcluir").textContent = "Erro: " + err;
+      }
+    }
+
+    // Carregar franquias e produtos ao carregar a página
+    window.addEventListener("DOMContentLoaded", () => {
+      carregarFranquias();
+      carregarProdutos();
+    });
+  </script>
+</body>
+</html>
