@@ -22,7 +22,7 @@ const obterCategoriaPorIdController = async (req, res) => {
         if (categoria) {
             res.json(categoria)
         } else {
-            res.status(404).json({ menssagem: `Categoria não encontrado` })
+            res.status(404).json({ menssagem: `Categoria não encontrada` })
         }
     } catch (err) {
         console.error('Erro ao obter categoria por ID: ', err)
@@ -35,10 +35,13 @@ const obterCategoriaPorIdController = async (req, res) => {
 const criarCategoriaController = async (req, res) => {
     try {
         const { nome, descricao} = req.body;
+
+        //Para a realização de upload
         let icone = null;
         if (req.file) {
             icone = req.file.path.replace(__dirname.replace('\\controllers', ''), '');
         }
+        
         const categoriaData = {
             nome: nome,
             descricao: descricao,

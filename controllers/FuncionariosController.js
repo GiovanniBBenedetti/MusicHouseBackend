@@ -59,6 +59,7 @@ const criarFuncionarioController = async (req, res) => {
       email,
       telefone,
       id_credencial,
+      senha
     } = req.body;
 
     let fotoPerfil = null;
@@ -74,12 +75,13 @@ const criarFuncionarioController = async (req, res) => {
       rg,
       data_nascimento,
       sexo,
+      senha,
       estado_civil,
       email,
       telefone,
       id_franquia,
       id_credencial,
-      fotoPerfil
+      fotoFuncionario: fotoPerfil
     };
 
     const funcionarioId = await criarFuncionario(funcionarioData);

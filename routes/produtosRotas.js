@@ -7,10 +7,12 @@ import { fileURLToPath } from 'url';
 const router = express.Router();
 
 
-
+//caminho absoluto do arquivo atual e Diretório do arquivo atual.
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+
+//local onde sera marzenado os uploads
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, path.join(__dirname, '../uploads/fotosProdutos'));

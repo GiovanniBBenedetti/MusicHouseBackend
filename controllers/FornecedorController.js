@@ -12,7 +12,6 @@ const listarFornecedoresController = async (req, res) => {
     }
 }
 
-
 const obterFornecedorPorIdController = async (req, res) => {
     try {
         const fornecedor = await obterFornecedorPorId(req.params.id)

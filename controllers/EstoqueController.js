@@ -61,8 +61,16 @@ const atualizarEstoqueController = async (req, res) => {
 const excluirEstoqueController = async (req, res) => {
   try {
     const id_estoque = req.params.id;
-    await excluirEstoque(id_estoque);
-    res.status(200).json({ mensagem: "Estoque excluído com sucesso" });
+
+    const VerificarIdEstoque =  await obterEstoquePorId(id_estoque)
+    
+    if(VerificarIdEstoque){
+      await excluirEstoque(id_estoque);
+      res.status(200).json({ mensagem: "Estoque excluído com sucesso" });
+    }else{
+      res.status(404).json({ menssagem: "Nenhum estoque encontrado com esse id"})
+    }
+  
   } catch (error) {
     console.error("Erro ao excluir estoque:", error);
     res.status(500).json({ mensagem: "Erro ao excluir estoque" });
