@@ -5,6 +5,8 @@ import funcionarioRotas from './routes/funcionarioRotas.js';
 import categoriasRotas from './routes/categoriaRotas.js'
 import estoqueRotas from './routes/estoqueRotas.js'
 import franquiasRotas from './routes/franquiasRotas.js'
+import fornecedorRotas from './routes/fornecedorRotas.js'
+
 
 const app = express()
 const port = 8080
@@ -17,6 +19,7 @@ app.use('/produtos', produtosRotas)
 app.use('/categorias', categoriasRotas)
 app.use('/estoque', estoqueRotas)
 app.use('/franquias', franquiasRotas)
+app.use('/fornecedores', fornecedorRotas)
 
 
 
