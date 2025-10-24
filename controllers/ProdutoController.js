@@ -39,18 +39,18 @@ const criarProdutoController = async (req, res) => {
         if (req.file) {
             imagemProduto = req.file.path.replace(__dirname.replace('\\controllers', ''), '');
         }
-    const produtoData = {
-  nome: nome || null,
-  descricao: descricao || null,
-  materiais: materiais || null,
-  detalhes: detalhes || null,
-  cor: cor || null,
-  id_categoria: id_categoria || null,
-  valor: valor || null,
-  desconto: desconto || null,
-  custo_producao: custo_producao || null,
-  imagem: imagemProduto || null
-};
+        const produtoData = {
+            nome: nome || null,
+            descricao: descricao || null,
+            materiais: materiais || null,
+            detalhes: detalhes || null,
+            cor: cor || null,
+            id_categoria: id_categoria || null,
+            valor: valor || null,
+            desconto: desconto || null,
+            custo_producao: custo_producao || null,
+            imagem: imagemProduto || null
+        };
         const produtoId = await criarProduto(produtoData);
         res.status(201).json({ menssagem: 'Produto criado com sucesso', produtoId });
     } catch (error) {
@@ -67,18 +67,18 @@ const atualizarProdutoController = async (req, res) => {
         if (req.file) {
             imagemProduto = req.file.path.replace(__dirname.replace('\\controllers', ''), '');
         }
- const produtoData = {
-  nome: nome || null,
-  descricao: descricao || null,
-  materiais: materiais || null,
-  detalhes: detalhes || null,
-  cor: cor || null,
-  id_categoria: id_categoria || null,
-  valor: valor || null,
-  desconto: desconto || null,
-  custo_producao: custo_producao || null,
-  imagem: imagemProduto || null
-};
+        const produtoData = {
+            nome: nome || null,
+            descricao: descricao || null,
+            materiais: materiais || null,
+            detalhes: detalhes || null,
+            cor: cor || null,
+            id_categoria: id_categoria || null,
+            valor: valor || null,
+            desconto: desconto || null,
+            custo_producao: custo_producao || null,
+            imagem: imagemProduto || null
+        };
 
         await atualizarProduto(produtoId, produtoData);
         res.status(200).json({ menssagem: 'Produto atualizado com sucesso' });
@@ -89,25 +89,25 @@ const atualizarProdutoController = async (req, res) => {
 };
 
 const excluirProdutoController = async (req, res) => {
-  try {
-    const produtoId = req.params.id;
-    const produto = await obterProdutoPorId(produtoId); 
+    try {
+        const produtoId = req.params.id;
+        const produto = await obterProdutoPorId(produtoId);
 
-    if (!produto) {
-      return res.status(404).json({ mensagem: 'Nenhum produto encontrado com esse id' });
+        if (!produto) {
+            return res.status(404).json({ mensagem: 'Nenhum produto encontrado com esse id' });
+        }
+
+        await excluirProduto(produtoId);
+        res.status(200).json({ mensagem: 'Produto excluído com sucesso' });
+
+    } catch (error) {
+        console.error('Erro ao excluir produto:', error);
+        res.status(500).json({ mensagem: 'Erro ao excluir produto' });
     }
-
-    await excluirProduto(produtoId);
-    res.status(200).json({ mensagem: 'Produto excluído com sucesso' });
-
-  } catch (error) {
-    console.error('Erro ao excluir produto:', error);
-    res.status(500).json({ mensagem: 'Erro ao excluir produto' });
-  }
 };
 
 
 export {
- listarProdutosController, obterProdutoPorIdController, criarProdutoController, atualizarProdutoController, excluirProdutoController
+    listarProdutosController, obterProdutoPorIdController, criarProdutoController, atualizarProdutoController, excluirProdutoController
 
 };

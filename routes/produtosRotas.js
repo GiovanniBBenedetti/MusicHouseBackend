@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url';
 const router = express.Router();
 
 
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -20,6 +21,7 @@ const storage = multer.diskStorage({
     }
 });
 const upload = multer({ storage: storage });
+
 
 router.get('/', listarProdutosController)
 router.get('/:id',obterProdutoPorIdController)
