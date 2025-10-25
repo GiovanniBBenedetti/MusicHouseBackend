@@ -5,6 +5,9 @@ import {
 } from '../models/Funcionario.js';
 import { fileURLToPath } from 'url';
 import path from 'path'
+import generatePassword from '../tools/ganaratePassword.js'
+import { enviarEmailCadastrarFuncionario } from '../tools/nodemailer.js';
+
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -59,14 +62,13 @@ const criarFuncionarioController = async (req, res) => {
       email,
       telefone,
       id_credencial,
-      senha
     } = req.body;
 
     let fotoPerfil = null;
     if (req.file) {
       fotoPerfil = req.file.path.replace(__dirname.replace('\\controllers', ''), '');
     }
-
+    const senhaFuncionario = await generatePassword()
     const id_franquia = req.query.franquia || 1;
 
     const funcionarioData = {
@@ -75,9 +77,9 @@ const criarFuncionarioController = async (req, res) => {
       rg,
       data_nascimento,
       sexo,
-      senha,
       estado_civil,
       email,
+      senha: senhaFuncionario,
       telefone,
       id_franquia,
       id_credencial,
@@ -85,6 +87,8 @@ const criarFuncionarioController = async (req, res) => {
     };
 
     const funcionarioId = await criarFuncionario(funcionarioData);
+    enviarEmailCadastrarFuncionario(nome_completo, senhaFuncionario, email, funcionarioId)
+
     res.status(201).json({
       mensagem: 'Funcionario Criado com sucesso !!!',
       funcionarioId,

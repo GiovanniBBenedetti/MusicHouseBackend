@@ -54,6 +54,9 @@ async function read(table, where) {
     }
 }
 
+
+
+
 //Função para inserir dados
 async function create(table, data) {
     const connection = await getConnection();

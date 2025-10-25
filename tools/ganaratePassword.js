@@ -1,4 +1,7 @@
-async function generatePassword() {
+
+
+
+export default async function generatePassword() {
     var tamanho = 8,
       caracteries =
         'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789',
