@@ -6,6 +6,7 @@ import {
 import { fileURLToPath } from 'url';
 import path from 'path'
 import generatePassword from '../tools/ganaratePassword.js'
+import {generateHashedPassword} from '../tools/hashPassword.js'
 import { enviarEmailCadastrarFuncionario } from '../tools/nodemailer.js';
 
 
@@ -69,6 +70,11 @@ const criarFuncionarioController = async (req, res) => {
       fotoPerfil = req.file.path.replace(__dirname.replace('\\controllers', ''), '');
     }
     const senhaFuncionario = await generatePassword()
+    
+
+    const hashSenha = await generateHashedPassword(senhaFuncionario)
+
+
     const id_franquia = req.query.franquia || 1;
 
     const funcionarioData = {
@@ -79,7 +85,7 @@ const criarFuncionarioController = async (req, res) => {
       sexo,
       estado_civil,
       email,
-      senha: senhaFuncionario,
+      senha: hashSenha,
       telefone,
       id_franquia,
       id_credencial,
