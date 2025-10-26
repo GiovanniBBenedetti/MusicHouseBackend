@@ -1,4 +1,4 @@
-
+  import bcrypt from "bcryptjs"
 
 
 export default async function generatePassword() {
@@ -12,5 +12,12 @@ export default async function generatePassword() {
     return senha;
   }
   
+
+
+
+
+
   
 generatePassword();
+
+
