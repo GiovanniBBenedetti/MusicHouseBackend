@@ -14,13 +14,17 @@ import authRotas from './routes/authRotas.js'
 const app = express();
 const port = 8080;
 
+// Configuração do CORS
 app.use(cors({
-    origin: true,
-    credentials: true,
+    origin: 'http://localhost:3000',  // domínio do frontend
+    credentials: true // Permitir envio de cookies
 }));
 
+// Middleware para ler JSON no corpo das requisições
 app.use(express.json());
-app.use('/uploads', express.static('uploads')); 
+
+// Servir arquivos estáticos da pasta uploads
+app.use('/uploads', express.static('uploads'));
 
 app.use('/auth', authRotas);
 app.use('/funcionarios', funcionarioRotas);

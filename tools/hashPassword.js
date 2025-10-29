@@ -1,5 +1,7 @@
 import bcrypt from "bcryptjs"
 
+
+//função para hashear a senha
 async function generateHashedPassword(senha) {
     try {
         const salt = await bcrypt.genSalt(10);

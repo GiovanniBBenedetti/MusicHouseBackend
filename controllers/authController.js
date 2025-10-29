@@ -4,10 +4,10 @@ import crypto from "crypto";
 import { read, update } from "../config/database.js";
 import { JWT_SECRET } from "../config/jwt.js";
 import { enviarEmailCodigo, enviarEmailRecuperacao } from "../tools/nodemailer.js";
-import path from "path";
 
 
 export const login = async (req, res) => {
+
   const { id_registro, senha } = req.body;
 
   try {
@@ -19,15 +19,19 @@ export const login = async (req, res) => {
     const funcionario = Array.isArray(resultado) ? resultado[0] : resultado;
 
     if (!funcionario) {
-      return res.status(404).json({ success: false, message: "Funcionário não encontrado." });
+      res.status(401).json({ success: false, message: "Número de registro ou senha inválidos" });
+      return 
+   
     }
 
+    //compara a senha fornecida com a senha hasheada no banco de dados
     const senhaValida = await bcryptjs.compare(senha, funcionario.senha);
     if (!senhaValida) {
-      return res.status(401).json({ success: false, message: "Senha incorreta." });
+      return res.status(401).json({ success: false, message: "Número de registro ou senha inválidos" });
     }
 
 
+    //se o usuário estiver no primeiro login, será enviado um código para o e-mail cadastrado
     if (funcionario.primeiroLogin === 1) {
       const codigo = Math.floor(100000 + Math.random() * 900000).toString();
 
@@ -50,21 +54,23 @@ export const login = async (req, res) => {
     );
 
 
+    // Verifica se está em produção
     const isProd = process.env.NODE_ENV === "production";
 
+    // Configura o cookie com as opções apropriadas para produção e desenvolvimento
     res.cookie("token", token, {
       httpOnly: true,
       secure: isProd,
       sameSite: isProd ? "none" : "lax",
-      maxAge: 60 * 60 * 1000,
+      maxAge: 60 * 60 * 1000, // 1 hora
       path: isProd ? ".seu-dominio.com" : 'localhost'
-    });
+    })
 
 
-    return res.status(200).json({
+     res.status(200).json({
       success: true,
       message: "Login realizado com sucesso.",
-      etapa: "login",
+      etapa: "login_finalizado",
       funcionario: {
         id_registro: funcionario.id_registro,
         nome: funcionario.nome_completo,
@@ -96,11 +102,14 @@ export const verificarCodigo = async (req, res) => {
     }
 
 
+    // Zera o token e mantém o primeiroLogin como 0
     await update(
       "funcionarios",
-      { token: null, primeiroLogin: 1 },
+      { token: null, primeiroLogin: 0},
       `id_registro = '${id_registro}'`
     );
+
+
 
     return res.status(200).json({
       success: true,
@@ -128,25 +137,16 @@ export const alterarSenhaPrimeiroAcesso = async (req, res) => {
       return res.status(404).json({ success: false, message: "Funcionário não encontrado." });
     }
 
+    // Atualiza a senha hasheando 
     const senhaHash = await bcryptjs.hash(novaSenha, 10);
     await update("funcionarios", { senha: senhaHash }, `id_registro = '${id_registro}'`);
 
-    const token = jwt.sign(
-      { id: funcionario.id_registro, email: funcionario.email },
-      JWT_SECRET,
-      { expiresIn: "1h" }
-    );
 
     return res.status(200).json({
       success: true,
       message: "Senha atualizada com sucesso. Login concluído.",
-      etapa: "login_finalizado",
-      token,
-      funcionario: {
-        id_registro: funcionario.id_registro,
-        nome: funcionario.nome_completo,
-        email: funcionario.email,
-      },
+      etapa: "login",
+      token
     });
   } catch (error) {
     console.error("Erro ao alterar senha:", error);
@@ -170,15 +170,21 @@ export const forgotPassword = async (req, res) => {
       return res.status(404).json({ success: false, message: "Funcionário não encontrado." });
     }
 
+    //gera um token hasehado
     const resetToken = crypto.randomBytes(20).toString("hex");
+
+    //gera um token de expiração para 1 hora para verificação
     const resetExpires = new Date(Date.now() + 3600000);
 
+    //salva os tokens no banco de dados
     await update(
       "funcionarios",
       { reset_token: resetToken, reset_expires: resetExpires },
       `id_registro = '${funcionario.id_registro}'`
     );
 
+
+    //envia o e-mail com o link de recuperação
     const link = `${process.env.CLIENT_URL}/resetar-senha/${resetToken}`;
     await enviarEmailRecuperacao(funcionario.email, link);
 
@@ -201,10 +207,13 @@ export const resetPassword = async (req, res) => {
       return res.status(400).json({ success: false, message: "Token inválido ou expirado." });
     }
 
+    //verifica se o token expirou
     if (new Date(funcionario.reset_expires) < new Date()) {
       return res.status(400).json({ success: false, message: "Token expirado." });
     }
 
+
+    //atualiza a senha do funcionário no banco de dados
     const senhaHash = await bcryptjs.hash(senha, 10);
     await update(
       "funcionarios",
@@ -218,3 +227,11 @@ export const resetPassword = async (req, res) => {
     res.status(500).json({ success: false, message: "Erro ao redefinir senha." });
   }
 };
+
+
+
+export const logout = (req, res) => {
+  //limpa o cookie do token
+  res.clearCookie('token'); 
+  res.json({ message: 'Logout realizado com sucesso' });
+}
