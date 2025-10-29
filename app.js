@@ -14,7 +14,11 @@ import authRotas from './routes/authRotas.js'
 const app = express();
 const port = 8080;
 
-app.use(cors());
+app.use(cors({
+    origin: true,
+    credentials: true,
+}));
+
 app.use(express.json());
 app.use('/uploads', express.static('uploads')); 
 
