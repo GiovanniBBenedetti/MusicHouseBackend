@@ -2,22 +2,18 @@ import jwt from 'jsonwebtoken';
 import { JWT_SECRET } from '../config/jwt.js';
 
 const authMiddleware = (req, res, next) => {
-  const authHeader = req.headers.authorization;
+  const authHeader = req.cookies['token']
 
   if (!authHeader) {
     return res.status(401).json({ mensagem: 'Não autorizado: Token não fornecido' });
   }
 
-  const [, token] = authHeader.split(' ');
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(authHeader, JWT_SECRET);
 
     req.usuario = {
-      id: decoded.id, 
-      nome: decoded.nome,
-      numeroRegistro: decoded.numeroRegistro,
-      funcao: decoded.funcao
+      id_registro: decoded.id_registro
     };
 
     next();
