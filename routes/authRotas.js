@@ -5,7 +5,7 @@ import {
   alterarSenhaPrimeiroAcesso, 
   forgotPassword,
   resetPassword,
-  logout,
+  logout, verificarAutenticacaoUsuario
 } from "../controllers/authController.js";
 
 const router = express.Router();
@@ -16,5 +16,6 @@ router.post("/alterar-senha-primeiro-acesso", alterarSenhaPrimeiroAcesso)
 router.post("/esqueci-senha", forgotPassword)
 router.post("/resetar-senha/:token", resetPassword)
 router.post("/logout", logout)
+router.get("/auth-check", verificarAutenticacaoUsuario) 
 
 export default router;

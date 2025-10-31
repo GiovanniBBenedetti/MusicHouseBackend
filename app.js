@@ -7,12 +7,16 @@ import estoqueRotas from './routes/estoqueRotas.js'
 import franquiasRotas from './routes/franquiasRotas.js'
 import fornecedorRotas from './routes/fornecedorRotas.js'
 import authRotas from './routes/authRotas.js'
+import cookieParser from 'cookie-parser';
 
 
 
 
 const app = express();
 const port = 8080;
+
+
+app.use(cookieParser());
 
 // Configuração do CORS
 app.use(cors({

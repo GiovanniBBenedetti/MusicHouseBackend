@@ -1,14 +1,20 @@
 import mysql from 'mysql2/promise'
 import bcypt from 'bcryptjs'
 
+
+// Carregar variáveis de ambiente
+import dotenv from 'dotenv'
+dotenv.config()
+
+
 const pool = mysql.createPool({
-    host: 'localhost',
-    user: 'root',
-    password: '',
-    database: 'musicHouse',
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0
+    host: process.env.NODE_DATABASE_HOST, // host do banco de dados
+    user: process.env.NODE_DATABASE_USER, // usuário banco de dados
+    password: process.env.NODE_DATABASE_PASSWORD || '', // senha banco de dados
+    database: process.env.NODE_DATABASE_NAME, // nome do banco de dados
+    waitForConnections: true, // mantém as conexões ativas
+    connectionLimit: 10, // número máximo de conexões
+    queueLimit: 0 
 });
 
 async function getConnection() {

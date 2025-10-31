@@ -14,7 +14,7 @@ const transport = nodemailer.createTransport({
 
 
 //tamplete base para os emails
-const templateBase = (conteudoHtml) => `
+const templateBase = (titulo, conteudoHtml) => `
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>

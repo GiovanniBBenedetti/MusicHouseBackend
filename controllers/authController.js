@@ -20,8 +20,8 @@ export const login = async (req, res) => {
 
     if (!funcionario) {
       res.status(401).json({ success: false, message: "Número de registro ou senha inválidos" });
-      return 
-   
+      return
+
     }
 
     //compara a senha fornecida com a senha hasheada no banco de dados
@@ -67,7 +67,7 @@ export const login = async (req, res) => {
     })
 
 
-     res.status(200).json({
+    res.status(200).json({
       success: true,
       message: "Login realizado com sucesso.",
       etapa: "login_finalizado",
@@ -105,7 +105,7 @@ export const verificarCodigo = async (req, res) => {
     // Zera o token e mantém o primeiroLogin como 0
     await update(
       "funcionarios",
-      { token: null, primeiroLogin: 0},
+      { token: null, primeiroLogin: 0 },
       `id_registro = '${id_registro}'`
     );
 
@@ -229,9 +229,48 @@ export const resetPassword = async (req, res) => {
 };
 
 
+export const verificarAutenticacaoUsuario = async (req, res) => {
+  try {
+
+    const token = req.cookies?.token
+
+    console.log('Token recebido no auth-check:', token)
+
+    if (!token) {
+      return res.status(401).json({ message: 'Unauthorized - token ausente' })
+    }
+
+    const decoded = jwt.verify(token, JWT_SECRET)
+
+    const resultado = await read('funcionarios', `id_registro = '${decoded.id}'`)
+    const user = Array.isArray(resultado) ? resultado[0] : resultado
+
+    if (!user) {
+      return res.status(401).json({ message: 'Unauthorized - usuário não encontrado' })
+    }
+
+ 
+    return res.status(200).json({
+      autenticado: true,
+      usuario: user,
+    })
+  } catch (error) {
+    console.error('Erro ao verificar autenticação:', error)
+    return res.status(401).json({ message: 'Unauthorized - token inválido ou expirado' })
+  }
+}
+
+
 
 export const logout = (req, res) => {
-  //limpa o cookie do token
-  res.clearCookie('token'); 
-  res.json({ message: 'Logout realizado com sucesso' });
+  try {
+    //limpa o cookie do token
+    res.clearCookie('token');
+    res.json({ message: 'Logout realizado com sucesso' });
+    console.log('Logout realizado com sucesso');
+
+  } catch (error) {
+    console.error('Erro ao realizar logout:', error);
+    res.status(500).json({ success: false, message: 'Erro ao realizar logout.' });
+  }
 }
