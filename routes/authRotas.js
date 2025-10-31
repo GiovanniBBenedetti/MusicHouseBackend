@@ -7,6 +7,7 @@ import {
   resetPassword,
   logout, verificarAutenticacaoUsuario
 } from "../controllers/authController.js";
+import authMiddleware from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
@@ -16,6 +17,6 @@ router.post("/alterar-senha-primeiro-acesso", alterarSenhaPrimeiroAcesso)
 router.post("/esqueci-senha", forgotPassword)
 router.post("/resetar-senha/:token", resetPassword)
 router.post("/logout", logout)
-router.get("/auth-check", verificarAutenticacaoUsuario) 
+router.get("/auth-check", authMiddleware, verificarAutenticacaoUsuario) 
 
 export default router;
