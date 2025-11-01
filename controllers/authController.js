@@ -29,16 +29,17 @@ export const login = async (req, res) => {
     if (!senhaValida) {
       return res.status(401).json({ success: false, message: "Número de registro ou senha inválidos" });
     }
-
-
+    
     //se o usuário estiver no primeiro login, será enviado um código para o e-mail cadastrado
     if (funcionario.primeiroLogin === 1) {
-      const codigo = Math.floor(100000 + Math.random() * 900000).toString();
 
-      await enviarEmailCodigo(funcionario.nome_completo, codigo, funcionario.email);
+      const codigo = Math.floor(100000 + Math.random() * 900000).toString(); // Gera um código de 6 dígitos
+      const resetExpires = new Date(Date.now() + 10 * 60 * 1000); // Código válido por 10 minutos
 
-      await update("funcionarios", { token: codigo }, `id_registro = '${id_registro}'`);
 
+      enviarEmailCodigo(funcionario.nome_completo, codigo, funcionario.email); //envia o código por e-mail
+
+      await update("funcionarios", { token: codigo, reset_expires: resetExpires  }, `id_registro = '${id_registro}'`); //salva o código e a expiração no banco de dados
       return res.status(200).json({
         success: true,
         message: "Primeiro acesso: código de verificação enviado ao e-mail.",
@@ -48,11 +49,10 @@ export const login = async (req, res) => {
 
 
     const token = jwt.sign(
-      { id: funcionario.id_registro },
+      { id_registro: funcionario.id_registro },
       JWT_SECRET,
       { expiresIn: "1h" }
     );
-
 
     // Verifica se está em produção
     const isProd = process.env.NODE_ENV === "production";
@@ -60,12 +60,11 @@ export const login = async (req, res) => {
     // Configura o cookie com as opções apropriadas para produção e desenvolvimento
     res.cookie("token", token, {
       httpOnly: true,
-      secure: isProd,
-      sameSite: isProd ? "none" : "lax",
-      maxAge: 60 * 60 * 1000, // 1 hora
-      path: isProd ? ".seu-dominio.com" : 'localhost'
-    })
-
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 24 * 60 * 60 * 1000,
+      path: "/",
+    });
 
     res.status(200).json({
       success: true,
@@ -88,28 +87,21 @@ export const login = async (req, res) => {
 
 export const verificarCodigo = async (req, res) => {
   try {
-    const { id_registro, codigo } = req.body;
+    const { codigo } = req.body;
 
-    const resultado = await read("funcionarios", `id_registro = '${id_registro}'`);
+    const resultado = await read("funcionarios", `token = '${codigo}' AND reset_expires > NOW()`);
     const funcionario = Array.isArray(resultado) ? resultado[0] : resultado;
 
     if (!funcionario) {
-      return res.status(404).json({ success: false, message: "Funcionário não encontrado." });
+      return res.status(400).json({ success: false, message: "token incorreto ou expirado" });
     }
-
-    if (funcionario.token !== codigo) {
-      return res.status(400).json({ success: false, message: "Código incorreto ou expirado." });
-    }
-
 
     // Zera o token e mantém o primeiroLogin como 0
     await update(
       "funcionarios",
-      { token: null, primeiroLogin: 0 },
-      `id_registro = '${id_registro}'`
+      { token: null, reset_expires: null},
+      `token = '${codigo}'`
     );
-
-
 
     return res.status(200).json({
       success: true,
@@ -232,24 +224,15 @@ export const resetPassword = async (req, res) => {
 export const verificarAutenticacaoUsuario = async (req, res) => {
   try {
 
-    const token = req.cookies?.token
-
-    console.log('Token recebido no auth-check:', token)
-
-    if (!token) {
-      return res.status(401).json({ message: 'Unauthorized - token ausente' })
-    }
-
-    const decoded = jwt.verify(token, JWT_SECRET)
-
-    const resultado = await read('funcionarios', `id_registro = '${decoded.id}'`)
+    const idFuncionario = req.usuario.id_registro
+    const resultado = await read('funcionarios', `id_registro = '${idFuncionario}'`)
     const user = Array.isArray(resultado) ? resultado[0] : resultado
 
     if (!user) {
       return res.status(401).json({ message: 'Unauthorized - usuário não encontrado' })
     }
 
- 
+
     return res.status(200).json({
       autenticado: true,
       usuario: user,
